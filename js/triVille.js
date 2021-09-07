@@ -74,9 +74,9 @@ function distanceFromGrenoble(ville) {
         Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-    const distanceAGrenoble = R * c; // in metres
+    return ville.distanceFromGrenoble = R * c; // in metres
 
-    return distanceAGrenoble;
+
 }
 
 /**
@@ -87,7 +87,7 @@ function distanceFromGrenoble(ville) {
  * @return vrai si la ville i est plus proche
  */
 function isLess(i, j) {
-    if (distanceFromGrenoble(i) < distanceFromGrenoble(j)) {
+    if (i.distanceFromGrenoble < j.distanceFromGrenoble) {
         return true;
     }
 }
@@ -97,18 +97,15 @@ function isLess(i, j) {
  * @param {*} i
  * @param {*} j
  */
-function swap(i, j) {
-    if (isLess(i, j) === true) {
-        let temp = i;
-        i = j;
-        j = temp
-    }
+function swap(tableau,i, j) {
+    [tableau[i], tableau[j]] = [tableau[j], tableau[i]];
+    nbPermutation++;
 }
 
 function sort(type) {
     switch (type) {
         case 'insert':
-            insertsort(listVille);
+            insertsort();
             break;
         case 'select':
             selectionsort();
@@ -120,56 +117,169 @@ function sort(type) {
             shellsort();
             break;
         case 'merge':
-            mergesort();
+            listVille=mergesort(listVille);
             break;
         case 'heap':
-            heapsort();
+            listVille=heapsort(listVille);
             break;
         case 'quick':
-            quicksort();
+            listVille=quicksort(listVille,0,listVille.length-1);
             break;
     }
 }
 
-function insertsort(tab) {
+function insertsort() {
     let temp
     let i
     let j
 
-    for( i=0; i<tab.length;i++){
-        temp=tab[i];
+    for( i=0; i<listVille.length;i++){
+        temp=listVille[i];
         j=i;
-        while(j>0 && tab[j-1]>temp){
-            swap(tab[j],tab[j-1])
+        while(j>0 && isLess(temp,listVille[j-1])){
+            swap(listVille,j,j-1)
             j=j-1;
         }
-        tab[j]=temp;
+        listVille[j]=temp;
     }
 }
 
 function selectionsort() {
-    console.log("selectionsort - implement me !");
+    for (let i = 0; i < listVille.length - 1; i++) {
+        for (let j = i + 1; j < listVille.length; j++) {
+            let min = i;
+            if(isLess(listVille[j],listVille[min])){
+                min = j;
+                swap(listVille,i,min)
+            }
+        }
+    }
 }
 
 function bubblesort() {
-    console.log("bubblesort - implement me !");
+    let i = 0;
+    let j;
+    let permutation = true;
+    while (permutation) {
+        permutation = false;
+        i++;
+        for (j = 0; j < listVille.length - i; j++) {
+            if(isLess(listVille[j+1],listVille[j])){
+                permutation = true;
+                swap(listVille,j,j+1)
+            }
+        }
+    }
 }
 
 function shellsort() {
-    console.log("shellsort - implement me !");
+    let longueur = listVille.length;
+    let n = 0;
+    while (n < longueur) {
+        n = (3 * n + 1)
+    }
+    while (n !==0) {
+        n = Math.floor(n / 3)
+        for (let i = n; i < longueur; i++) {
+            let valeur = listVille[i];
+            let j = i;
+            while (j > n - 1 && isLess(valeur,listVille[j-n])) {
+                listVille[j] = listVille[j - n]
+                j = j - n
+            }
+            listVille[j] = valeur
+        }
+    }
 }
 
-function mergesort() {
-    console.log("mergesort - implement me !");
+function mergesort(tableau) {
+    if (tableau.length <= 1) {
+        return tableau
+    } else {
+        let milieu = Math.floor(tableau.length / 2)
+        let right = tableau.slice(milieu)
+        let left = tableau.slice(0, milieu)
+        tableau = fusion(mergesort(left), mergesort(right))
+        return tableau
+    }
+
+    function fusion(left, right) {
+        if (left.length === 0) {
+            return right
+        } else if (right.length === 0) {
+            return left
+        } else if (isLess(left[0] , right[0])) {
+            return [left[0]].concat(fusion(left.slice(1, left.length), right))
+        } else {
+            return [right[0]].concat(fusion(left, right.slice(1, right.length)))
+        }
+    }
 }
 
 
-function heapsort() {
-    console.log("heapsort - implement me !");
+function heapsort(tableau) {
+    organiser(tableau);
+    for (let i = tableau.length - 1; i !== 0; i--) {
+        swap( tableau,0, i);
+        redescendre(tableau, i, 0);
+    }
+    return tableau;
 }
 
-function quicksort() {
-    console.log("quicksort - implement me !");
+function organiser(tableau) {
+    for (let i = 0; i < tableau.length - 1; i++) {
+        remonter(tableau,i)
+    }
+}
+
+function remonter(tableau, index) {
+    if(isLess(tableau[Math.floor(index / 2)],tableau[index])){
+    // if (tableau[index] > tableau[Math.floor(index / 2)]) {
+        swap(tableau, index, Math.floor(index / 2));
+        remonter( tableau,Math.floor(index / 2));
+    }
+}
+
+function redescendre(tableau,element, index) {
+    let max
+    let formule = 2 * index + 1
+    if (formule < element) {
+        if(isLess(tableau[2*index],tableau[formule])){
+        // if (tableau[formule] > tableau[2 * index]) {
+            max = formule;
+        } else {
+            max = 2 * index
+        }
+        if(isLess(tableau[index],tableau[max])){
+        // if (tableau[max] > tableau[index]) {
+            swap(tableau, max, index)
+            redescendre(tableau,element, max)
+        }
+    }
+}
+
+
+function quicksort(tableau,premier,dernier) {
+    if (premier < dernier) {
+        let pi = partitionner(tableau, premier, dernier)
+        quicksort(tableau, premier, pi - 1)
+        quicksort(tableau, pi + 1, dernier)
+    }
+    return tableau
+}
+
+function partitionner(tableau, premier, dernier) {
+    let pivot = dernier;
+    let j = premier;
+    for (let i = premier; i < dernier; i++) {
+        if (isLess(tableau[i],tableau[pivot])){
+        // (tableau[i] <= tableau[pivot]) {
+             swap(tableau, i, j)
+            j = j + 1;
+        }
+    }
+     swap(tableau,dernier, j)
+    return j;
 }
 
 /** MODEL */
