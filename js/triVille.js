@@ -61,8 +61,22 @@ function getArrayCsv(csv) {
  * @returns la distance qui sépare la ville de Grenoble
  */
 function distanceFromGrenoble(ville) {
-    console.log('implement me !');
-    return 0;
+    const latitudeGrenoble = 45.188529;
+    const longitudeGrenoble = 5.724524;
+    const R = 6371e3; // metres
+    const φ1 = latitudeGrenoble * Math.PI / 180; // φ, λ in radians
+    const φ2 = ville.latitude * Math.PI / 180;
+    const Δφ = (ville.latitude - latitudeGrenoble) * Math.PI / 180;
+    const Δλ = (ville.longitude - longitudeGrenoble) * Math.PI / 180;
+
+    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+        Math.cos(φ1) * Math.cos(φ2) *
+        Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    const distanceAGrenoble = R * c; // in metres
+
+    return distanceAGrenoble;
 }
 
 /**
@@ -73,23 +87,28 @@ function distanceFromGrenoble(ville) {
  * @return vrai si la ville i est plus proche
  */
 function isLess(i, j) {
-    console.log('implement me !');
-    return true;
+    if (distanceFromGrenoble(i) < distanceFromGrenoble(j)) {
+        return true;
+    }
 }
 
 /**
  * interverti la ville i avec la ville j dans la liste des villes
- * @param {*} i 
- * @param {*} j 
+ * @param {*} i
+ * @param {*} j
  */
 function swap(i, j) {
-    console.log('implement me !');
+    if (isLess(i, j) === true) {
+        let temp = i;
+        i = j;
+        j = temp
+    }
 }
 
 function sort(type) {
     switch (type) {
         case 'insert':
-            insertsort();
+            insertsort(listVille);
             break;
         case 'select':
             selectionsort();
@@ -112,8 +131,20 @@ function sort(type) {
     }
 }
 
-function insertsort() {
-    console.log("insertsort - implement me !");
+function insertsort(tab) {
+    let temp
+    let i
+    let j
+
+    for( i=0; i<tab.length;i++){
+        temp=tab[i];
+        j=i;
+        while(j>0 && tab[j-1]>temp){
+            swap(tab[j],tab[j-1])
+            j=j-1;
+        }
+        tab[j]=temp;
+    }
 }
 
 function selectionsort() {
