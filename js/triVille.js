@@ -3,6 +3,7 @@ let listVille = [];
 let nbPermutation = 0;
 let nbComparaison = 0;
 
+
 document.querySelector("#read-button").addEventListener('click', function () {
     csvFile = document.querySelector("#file-input").files[0];
     let reader = new FileReader();
@@ -97,7 +98,7 @@ function isLess(i, j) {
  * @param {*} i
  * @param {*} j
  */
-function swap(tableau,i, j) {
+function swap(tableau, i, j) {
     [tableau[i], tableau[j]] = [tableau[j], tableau[i]];
     nbPermutation++;
 }
@@ -105,94 +106,103 @@ function swap(tableau,i, j) {
 function sort(type) {
     switch (type) {
         case 'insert':
-            insertsort();
+            listVille = insertsort(listVille);
             break;
         case 'select':
-            selectionsort();
+            listVille = selectionsort(listVille);
             break;
         case 'bubble':
-            bubblesort();
+            listVille = bubblesort(listVille);
             break;
         case 'shell':
-            shellsort();
+            listVille = shellsort(listVille);
             break;
         case 'merge':
-            listVille=mergesort(listVille);
+            listVille = mergesort(listVille);
             break;
         case 'heap':
-            listVille=heapsort(listVille);
+            listVille = heapsort(listVille);
             break;
         case 'quick':
-            listVille=quicksort(listVille,0,listVille.length-1);
+            listVille = quicksort(listVille, 0, listVille.length - 1);
             break;
     }
 }
 
-function insertsort() {
+function insertsort(tableau) {
     let temp
     let i
     let j
-
-    for( i=0; i<listVille.length;i++){
-        temp=listVille[i];
-        j=i;
-        while(j>0 && isLess(temp,listVille[j-1])){
-            swap(listVille,j,j-1)
-            j=j-1;
+    tableau = [...tableau]
+    for (i = 0; i < tableau.length; i++) {
+        temp = tableau[i];
+        j = i;
+        while (j > 0 && isLess(temp, tableau[j - 1])) {
+            swap(tableau, j, j - 1)
+            j = j - 1;
         }
-        listVille[j]=temp;
+        tableau[j] = temp;
     }
+    return tableau
 }
 
-function selectionsort() {
-    for (let i = 0; i < listVille.length - 1; i++) {
-        for (let j = i + 1; j < listVille.length; j++) {
+function selectionsort(tableau) {
+    tableau = [...tableau]
+    for (let i = 0; i < tableau.length - 1; i++) {
+        for (let j = i + 1; j < tableau.length; j++) {
             let min = i;
-            if(isLess(listVille[j],listVille[min])){
+            if (isLess(tableau[j], tableau[min])) {
                 min = j;
-                swap(listVille,i,min)
+                swap(tableau, i, min)
             }
         }
     }
+    return tableau
 }
 
-function bubblesort() {
+function bubblesort(tableau) {
+    tableau = [...tableau]
     let i = 0;
     let j;
     let permutation = true;
     while (permutation) {
         permutation = false;
         i++;
-        for (j = 0; j < listVille.length - i; j++) {
-            if(isLess(listVille[j+1],listVille[j])){
+        for (j = 0; j < tableau.length - i; j++) {
+            if (isLess(tableau[j + 1], tableau[j])) {
                 permutation = true;
-                swap(listVille,j,j+1)
+                swap(tableau, j, j + 1)
             }
         }
     }
+    return tableau
 }
 
-function shellsort() {
-    let longueur = listVille.length;
+function shellsort(tableau) {
+    tableau = [...tableau]
+    let longueur = tableau.length;
     let n = 0;
     while (n < longueur) {
         n = (3 * n + 1)
     }
-    while (n !==0) {
+    while (n !== 0) {
         n = Math.floor(n / 3)
         for (let i = n; i < longueur; i++) {
-            let valeur = listVille[i];
+            let valeur = tableau[i];
             let j = i;
-            while (j > n - 1 && isLess(valeur,listVille[j-n])) {
-                listVille[j] = listVille[j - n]
+            while (j > n - 1 && isLess(valeur, tableau[j - n])) {
+                tableau[j] = tableau[j - n]
                 j = j - n
+                nbPermutation++;
             }
-            listVille[j] = valeur
+            tableau[j] = valeur
         }
     }
+    return tableau
 }
 
 function mergesort(tableau) {
+    tableau = [...tableau]
     if (tableau.length <= 1) {
         return tableau
     } else {
@@ -208,9 +218,10 @@ function mergesort(tableau) {
             return right
         } else if (right.length === 0) {
             return left
-        } else if (isLess(left[0] , right[0])) {
+        } else if (isLess(left[0], right[0])) {
             return [left[0]].concat(fusion(left.slice(1, left.length), right))
         } else {
+            nbPermutation++
             return [right[0]].concat(fusion(left, right.slice(1, right.length)))
         }
     }
@@ -218,9 +229,10 @@ function mergesort(tableau) {
 
 
 function heapsort(tableau) {
+    tableau = [...tableau]
     organiser(tableau);
     for (let i = tableau.length - 1; i !== 0; i--) {
-        swap( tableau,0, i);
+        swap(tableau, 0, i);
         redescendre(tableau, i, 0);
     }
     return tableau;
@@ -228,38 +240,36 @@ function heapsort(tableau) {
 
 function organiser(tableau) {
     for (let i = 0; i < tableau.length - 1; i++) {
-        remonter(tableau,i)
+        remonter(tableau, i)
     }
 }
 
 function remonter(tableau, index) {
-    if(isLess(tableau[Math.floor(index / 2)],tableau[index])){
-    // if (tableau[index] > tableau[Math.floor(index / 2)]) {
+    if (isLess(tableau[Math.floor(index / 2)], tableau[index])) {
         swap(tableau, index, Math.floor(index / 2));
-        remonter( tableau,Math.floor(index / 2));
+        remonter(tableau, Math.floor(index / 2));
     }
 }
 
-function redescendre(tableau,element, index) {
+function redescendre(tableau, element, index) {
     let max
     let formule = 2 * index + 1
     if (formule < element) {
-        if(isLess(tableau[2*index],tableau[formule])){
-        // if (tableau[formule] > tableau[2 * index]) {
+        if (isLess(tableau[2 * index], tableau[formule])) {
             max = formule;
         } else {
             max = 2 * index
         }
-        if(isLess(tableau[index],tableau[max])){
-        // if (tableau[max] > tableau[index]) {
+        if (isLess(tableau[index], tableau[max])) {
             swap(tableau, max, index)
-            redescendre(tableau,element, max)
+            redescendre(tableau, element, max)
         }
     }
 }
 
 
-function quicksort(tableau,premier,dernier) {
+function quicksort(tableau, premier, dernier) {
+    // tableau = [...tableau]
     if (premier < dernier) {
         let pi = partitionner(tableau, premier, dernier)
         quicksort(tableau, premier, pi - 1)
@@ -271,14 +281,13 @@ function quicksort(tableau,premier,dernier) {
 function partitionner(tableau, premier, dernier) {
     let pivot = dernier;
     let j = premier;
-    for (let i = premier; i < dernier; i++) {
-        if (isLess(tableau[i],tableau[pivot])){
-        // (tableau[i] <= tableau[pivot]) {
-             swap(tableau, i, j)
+    for (let i = premier; i <= dernier; i++) {
+        if (isLess(tableau[i], tableau[pivot])) {
+            swap(tableau, i, j)
             j = j + 1;
         }
     }
-     swap(tableau,dernier, j)
+    swap(tableau, dernier, j)
     return j;
 }
 
